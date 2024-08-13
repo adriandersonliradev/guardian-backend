@@ -12,12 +12,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guardiao.iot.bussines.iservice.DocumentoService;
 import com.guardiao.iot.dto.DocumentoDTO;
 import com.guardiao.iot.entity.DocumentoEntity.Documento;
 import javax.validation.Valid;
+import org.springframework.http.MediaType;
+
+
 
 @RestController
 @RequestMapping("/documentos")
@@ -38,10 +44,29 @@ public class DocumentoController {
         return documento.map(value -> ResponseEntity.ok().body(value)).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<DocumentoDTO> salvarDocumento(@RequestBody @Valid DocumentoDTO documento) {
-        DocumentoDTO savedDocumento = documentoService.save(documento);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedDocumento);
+    @GetMapping("/{id}/arquivo")
+    public ResponseEntity<byte[]> getDocumentoArquivo(@PathVariable Long id) {
+        byte[] pdfContent = documentoService.getDocumentoArquivo(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfContent);
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<DocumentoDTO> salvarDocumento(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("documentoDTO") String documentoDTOJson) {
+        try {
+            // Deserializando o DTO de JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            DocumentoDTO documentoDTO = objectMapper.readValue(documentoDTOJson, DocumentoDTO.class);
+
+            // Chamando o serviço para salvar o documento
+            DocumentoDTO savedDocumento = documentoService.save(documentoDTO, file);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedDocumento);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @DeleteMapping("/{id}")

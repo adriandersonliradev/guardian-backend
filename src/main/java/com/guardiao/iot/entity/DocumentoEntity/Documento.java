@@ -26,5 +26,6 @@ public class Documento {
     @JoinColumn(name = "tipo_documental_id")
     private TipoDocumental tipoDocumental;
 
-    // Getters and Setters
+    @Lob
+    private byte[] arquivoPdf;
 }

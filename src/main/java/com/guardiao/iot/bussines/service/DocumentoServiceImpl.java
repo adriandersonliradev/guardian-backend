@@ -2,6 +2,8 @@ package com.guardiao.iot.bussines.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.guardiao.iot.bussines.iservice.DocumentoService;
 import com.guardiao.iot.dto.DocumentoDTO;
@@ -11,6 +13,7 @@ import com.guardiao.iot.infrastructure.irepository.DocumentoRepository;
 import com.guardiao.iot.infrastructure.irepository.TipoDocumentalRepository;
 import com.guardiao.iot.mappers.DocumentoMapper;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +44,8 @@ public class DocumentoServiceImpl implements DocumentoService {
     }
 
     @Override
-    public DocumentoDTO save(DocumentoDTO documentoDTO) {
+    @Transactional
+    public DocumentoDTO save(DocumentoDTO documentoDTO, MultipartFile file) {
         Documento documento;
 
         if(documentoDTO.getId() != null){
@@ -54,11 +58,20 @@ public class DocumentoServiceImpl implements DocumentoService {
 
         associarEntidades(documento, documentoDTO);
         addDocuementoToTipoDocumental(documento, documento.getTipoDocumental());
+
+        try {
+            documento.setArquivoPdf(file.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao salvar o arquivo PDF", e);
+        }
+
         Documento savedDocumento = documentoRepository.save(documento);
+        System.out.println("Arquivo PDF: " + savedDocumento.getArquivoPdf());
         return DocumentoMapper.INSTANCE.toDTO(savedDocumento);
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         documentoRepository.deleteById(id);
     }
@@ -82,4 +95,13 @@ public class DocumentoServiceImpl implements DocumentoService {
             documento.setTipoDocumental(null);
         }
     }
+
+    @Override
+    public byte[] getDocumentoArquivo(Long id) {
+        Documento documento = documentoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Documento não encontrado"));
+        return documento.getArquivoPdf();
+    }
+
+
 }

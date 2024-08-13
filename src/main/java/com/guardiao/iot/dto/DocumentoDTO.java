@@ -9,6 +9,8 @@ public class DocumentoDTO {
     private LocalDateTime dataHora;
     private Long tipoDocumentalId;
     private Long usuarioId;
+    private byte[] arquivoPdf;
+
     public Long getId() {
         return id;
     }
@@ -33,6 +35,10 @@ public class DocumentoDTO {
     public void setUsuarioId(Long usuarioId) {
         this.usuarioId = usuarioId;
     }
-
-    
+    public byte[] getArquivoPdf() {
+        return arquivoPdf;
+    }
+    public void setArquivoPdf(byte[] arquivoPdf) {
+        this.arquivoPdf = arquivoPdf;
+    }
 }
