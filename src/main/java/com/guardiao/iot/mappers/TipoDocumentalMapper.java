@@ -23,7 +23,7 @@ public interface TipoDocumentalMapper {
     @Mapping(source = "status", target = "status")
     @Mapping(source = "tempoRetencao", target = "tempoRetencao") 
     @Mapping(source = "documentos", target = "idDocumentos", qualifiedByName = "mapDocumentosIds")
-    TipoDocumentalDTO toDTO (TipoDocumental tipoDocumental); 
+    TipoDocumentalDTO toDTO(TipoDocumental tipoDocumental);
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "nomeDocumento", target = "nomeDocumento")
@@ -38,3 +38,4 @@ public interface TipoDocumentalMapper {
         return documentos.stream().map(Documento::getId).collect(Collectors.toList());
     }
 }
+

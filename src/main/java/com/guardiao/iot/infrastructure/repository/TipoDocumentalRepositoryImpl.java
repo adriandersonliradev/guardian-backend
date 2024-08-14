@@ -29,6 +29,7 @@ public class TipoDocumentalRepositoryImpl implements TipoDocumentalRepository {
     }
 
     @Override
+    @Transactional
     public Optional<TipoDocumental> findById(Long id) {
         Session session = entityManager.unwrap(Session.class);
         return Optional.ofNullable(session.find(TipoDocumental.class, id));

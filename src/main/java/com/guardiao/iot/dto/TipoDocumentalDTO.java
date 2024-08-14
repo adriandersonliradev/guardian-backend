@@ -10,6 +10,7 @@ public class TipoDocumentalDTO {
     private String status;
     private String tempoRetencao;
     private List<Long> idDocumentos;
+    private int quantidadeDocumentos;
 
     public Long getId() {
         return id;
@@ -48,7 +49,12 @@ public class TipoDocumentalDTO {
         this.idDocumentos = idDocumentos;
     }
 
+    public int getQuantidadeDocumentos() {
+        return (idDocumentos != null) ? idDocumentos.size() : 0;
+    }
+    public void setQuantidadeDocumentos(int quantidadeDocumentos) {
+        this.quantidadeDocumentos = quantidadeDocumentos;
+    }
     
-
     
 }

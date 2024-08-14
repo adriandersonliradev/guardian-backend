@@ -25,10 +25,8 @@ public class TipoDocumental {
     private String status;
     private String tempoRetencao;
 
-    @OneToMany(mappedBy = "tipoDocumental", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(mappedBy = "tipoDocumental", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private List<Documento> documentos = new ArrayList<>();
-
-    // Getters e Setters
 
     public void addDocumento(Documento documento) {
         if (documento == null) {
