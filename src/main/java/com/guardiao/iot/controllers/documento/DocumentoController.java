@@ -70,7 +70,11 @@ public class DocumentoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarDocumento(@PathVariable Long id) {
-        documentoService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        try {
+            documentoService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Retorna 500 Internal Server Error
+        }
     }
 }

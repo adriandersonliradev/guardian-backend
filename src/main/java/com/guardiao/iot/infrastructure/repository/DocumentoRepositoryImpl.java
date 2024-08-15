@@ -44,12 +44,15 @@ public class DocumentoRepositoryImpl implements DocumentoRepository {
         return documento;
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         Session session = entityManager.unwrap(Session.class);
         Documento documento = session.find(Documento.class, id);
         if (documento != null) {
             session.delete(documento);
+        } else {
+            throw new Error("Documento não encontrado");
         }
     }
 
