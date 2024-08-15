@@ -12,11 +12,13 @@ public interface DocumentoMapper {
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "tipoDocumental.id", target = "tipoDocumentalId")
-    @Mapping(source = "arquivoPdf", target = "arquivoPdf", ignore = true)
+    @Mapping(source = "arquivoPdf", target = "arquivoPdf")
+    @Mapping(source = "nomeDocumento", target = "nomeDocumento")
     DocumentoDTO toDTO(Documento documento);
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "tipoDocumentalId", target = "tipoDocumental.id")
     @Mapping(source = "arquivoPdf", target = "arquivoPdf")
+    @Mapping(source = "nomeDocumento", target = "nomeDocumento")
     Documento toEntity(DocumentoDTO documentoDTO);
 }

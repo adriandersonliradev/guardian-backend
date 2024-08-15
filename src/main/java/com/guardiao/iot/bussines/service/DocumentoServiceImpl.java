@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.guardiao.iot.bussines.iservice.DocumentoService;
 import com.guardiao.iot.dto.DocumentoDTO;
+import com.guardiao.iot.dto.TipoDocumentalDTO;
 import com.guardiao.iot.entity.DocumentoEntity.Documento;
 import com.guardiao.iot.entity.TipoDocumentoEntity.TipoDocumental;
 import com.guardiao.iot.infrastructure.irepository.DocumentoRepository;
@@ -51,6 +52,7 @@ public class DocumentoServiceImpl implements DocumentoService {
         if(documentoDTO.getId() != null){
             documento = documentoRepository.findById(documentoDTO.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Documento não existe"));
+                documento.setNomeDocumento(documentoDTO.getNomeDocumento());
         }else{
             documento = DocumentoMapper.INSTANCE.toEntity(documentoDTO);
             documento.setDataHora(LocalDateTime.now());
@@ -67,6 +69,8 @@ public class DocumentoServiceImpl implements DocumentoService {
 
         Documento savedDocumento = documentoRepository.save(documento);
         System.out.println("Arquivo PDF: " + savedDocumento.getArquivoPdf());
+        DocumentoDTO savedDocumentoDTO = DocumentoMapper.INSTANCE.toDTO(savedDocumento);
+        System.out.println("Arquivo PDF no DTO: " + savedDocumentoDTO.getArquivoPdf());
         return DocumentoMapper.INSTANCE.toDTO(savedDocumento);
     }
 
@@ -102,6 +106,4 @@ public class DocumentoServiceImpl implements DocumentoService {
                 .orElseThrow(() -> new EntityNotFoundException("Documento não encontrado"));
         return documento.getArquivoPdf();
     }
-
-
 }
