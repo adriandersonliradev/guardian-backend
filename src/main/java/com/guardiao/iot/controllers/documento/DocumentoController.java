@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,11 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guardiao.iot.bussines.iservice.DocumentoService;
 import com.guardiao.iot.dto.DocumentoDTO;
-import com.guardiao.iot.entity.DocumentoEntity.Documento;
-import javax.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpHeaders; // Spring Framework
-import javax.servlet.http.HttpServletResponse; // Servlet API
 
 
 @RestController
