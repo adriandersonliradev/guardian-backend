@@ -54,6 +54,15 @@ public class DocumentoRepositoryImpl implements DocumentoRepository {
     }
 
     @Override
+    public List<Documento> findByTipoDocumentalId(Long tipoDocumentalId) {
+        Session session = entityManager.unwrap(Session.class);
+        return session.createQuery(" SELECT d FROM Documento d WHERE d.tipoDocumental.id = :tipoDocumentalId", Documento.class)
+                .setParameter("tipoDocumentalId", tipoDocumentalId)
+                .getResultList();
+    }
+
+
+    @Override
     public void deleteAllByIdInBatch(Iterable<Long> ids) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteAllByIdInBatch'");

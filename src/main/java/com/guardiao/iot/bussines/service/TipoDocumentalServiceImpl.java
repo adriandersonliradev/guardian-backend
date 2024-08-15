@@ -12,8 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.guardiao.iot.bussines.iservice.TipoDocumentalService;
 import com.guardiao.iot.dto.TipoDocumentalDTO;
+import com.guardiao.iot.entity.DocumentoEntity.Documento;
 import com.guardiao.iot.entity.TipoDocumentoEntity.TipoDocumental;
 import com.guardiao.iot.entity.UsuarioEntity.Usuario;
+import com.guardiao.iot.infrastructure.irepository.DocumentoRepository;
 import com.guardiao.iot.infrastructure.irepository.TipoDocumentalRepository;
 import com.guardiao.iot.infrastructure.irepository.UsuarioRepository;
 import com.guardiao.iot.mappers.TipoDocumentalMapper;
@@ -26,6 +28,9 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private DocumentoRepository documentoRepository;
 
     @Override
     @Transactional
@@ -75,6 +80,17 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
     @Override
     @Transactional
     public void deleteById(Long id) {
-        tipoDocumentalRepository.deleteById(id);
+        TipoDocumental tipoDocumental = tipoDocumentalRepository.findById(id)
+            .orElseThrow(()-> new EntityNotFoundException("tipo documental não existe"));
+            desassociarDocumentos(tipoDocumental);
+            tipoDocumentalRepository.deleteById(id);
+    }
+
+    private void desassociarDocumentos(TipoDocumental tipoDocumental) {
+        List<Documento> documentos = documentoRepository.findByTipoDocumentalId(tipoDocumental.getId());
+        for (Documento documento : documentos) {
+            tipoDocumental.removeDocumento(documento);
+        }
+        tipoDocumentalRepository.save(tipoDocumental);
     }
 }

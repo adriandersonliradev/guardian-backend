@@ -40,6 +40,7 @@ public class TipoDocumental {
     public void removeDocumento(Documento documento) {
         if (documento != null && documentos.contains(documento)) {
             documentos.remove(documento);
+            documento.setTipoDocumental(null);
         }
     }
 }

@@ -77,7 +77,18 @@ public class DocumentoServiceImpl implements DocumentoService {
     @Override
     @Transactional
     public void deleteById(Long id) {
-        documentoRepository.deleteById(id);
+        Documento documento = documentoRepository.findById(id)
+            .orElseThrow(()-> new EntityNotFoundException("documento não existe"));
+            desassociarDocumentoDeTipoDocumental(documento);
+            documentoRepository.deleteById(documento.getId());
+    }
+
+    private void desassociarDocumentoDeTipoDocumental(Documento documento) {
+        TipoDocumental tipoDocumental = documento.getTipoDocumental();
+        if (tipoDocumental != null) {
+            tipoDocumental.removeDocumento(documento);
+            documentoRepository.save(documento);
+        }
     }
 
     private void addDocuementoToTipoDocumental(Documento documento, TipoDocumental... tiposDocumentais) {
@@ -90,7 +101,6 @@ public class DocumentoServiceImpl implements DocumentoService {
     }
 
     private void associarEntidades(Documento documento, DocumentoDTO documentoDTO) {
-        // Associar Tipo Documental
         if (documentoDTO.getTipoDocumentalId() != null) {
             TipoDocumental tipoDocumental = tipoDocumentalRepository.findById(documentoDTO.getTipoDocumentalId())
                     .orElseThrow(() -> new EntityNotFoundException("Tipo Documental não existe"));

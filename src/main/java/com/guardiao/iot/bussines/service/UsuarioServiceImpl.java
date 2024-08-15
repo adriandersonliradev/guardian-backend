@@ -7,7 +7,9 @@ import com.guardiao.iot.infrastructure.irepository.UsuarioRepository;
 import com.guardiao.iot.mappers.UsuarioMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.beans.Transient;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,6 +34,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional
     public UsuarioDTO save(UsuarioDTO usuarioDTO) {
         Usuario usuario = UsuarioMapper.INSTANCE.toEntity(usuarioDTO);
         Usuario savedUsuario = usuarioRepository.save(usuario);
@@ -39,6 +42,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         usuarioRepository.deleteById(id);
     }
