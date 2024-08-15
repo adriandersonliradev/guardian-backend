@@ -21,11 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guardiao.iot.bussines.iservice.DocumentoService;
 import com.guardiao.iot.dto.DocumentoDTO;
-import com.guardiao.iot.entity.DocumentoEntity.Documento;
-import javax.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpHeaders; // Spring Framework
-import javax.servlet.http.HttpServletResponse; // Servlet API
 
 
 @RestController
