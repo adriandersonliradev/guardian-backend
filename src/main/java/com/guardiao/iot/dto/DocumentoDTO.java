@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public class DocumentoDTO {
     private Long id;
     private LocalDateTime dataHora;
+    private String nomeDocumento;
     private Long tipoDocumentalId;
     private Long usuarioId;
     private byte[] arquivoPdf;
@@ -41,4 +42,12 @@ public class DocumentoDTO {
     public void setArquivoPdf(byte[] arquivoPdf) {
         this.arquivoPdf = arquivoPdf;
     }
+    public String getNomeDocumento() {
+        return nomeDocumento;
+    }
+    public void setNomeDocumento(String nomeDocumento) {
+        this.nomeDocumento = nomeDocumento;
+    }
+
+    
 }

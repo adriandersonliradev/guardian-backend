@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/tiposdocumentais")
+@CrossOrigin(origins = "http://localhost:5173")
 public class TipoDocumentalController {
 
     @Autowired

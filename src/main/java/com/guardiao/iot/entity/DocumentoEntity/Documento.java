@@ -19,7 +19,7 @@ public class Documento {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
+    private String nomeDocumento;
     private LocalDateTime dataHora;
 
     @OneToOne

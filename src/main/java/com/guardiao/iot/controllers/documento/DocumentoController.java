@@ -1,11 +1,13 @@
 package com.guardiao.iot.controllers.documento;
 
+//import java.net.http.HttpHeaders;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,11 +24,13 @@ import com.guardiao.iot.dto.DocumentoDTO;
 import com.guardiao.iot.entity.DocumentoEntity.Documento;
 import javax.validation.Valid;
 import org.springframework.http.MediaType;
-
+import org.springframework.http.HttpHeaders; // Spring Framework
+import javax.servlet.http.HttpServletResponse; // Servlet API
 
 
 @RestController
 @RequestMapping("/documentos")
+@CrossOrigin(origins = "http://localhost:5173")
 public class DocumentoController {
 
     @Autowired
@@ -49,6 +53,7 @@ public class DocumentoController {
         byte[] pdfContent = documentoService.getDocumentoArquivo(id);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"documento_" + id + ".pdf\"")
                 .body(pdfContent);
     }
 
@@ -57,11 +62,9 @@ public class DocumentoController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("documentoDTO") String documentoDTOJson) {
         try {
-            // Deserializando o DTO de JSON
             ObjectMapper objectMapper = new ObjectMapper();
             DocumentoDTO documentoDTO = objectMapper.readValue(documentoDTOJson, DocumentoDTO.class);
 
-            // Chamando o serviço para salvar o documento
             DocumentoDTO savedDocumento = documentoService.save(documentoDTO, file);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedDocumento);
         } catch (Exception e) {
