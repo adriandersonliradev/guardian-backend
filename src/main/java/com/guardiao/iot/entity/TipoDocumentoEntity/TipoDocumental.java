@@ -20,6 +20,7 @@ public class TipoDocumental {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String nomeDocumento;
     private String leiRegulamentadora;
     private String status;

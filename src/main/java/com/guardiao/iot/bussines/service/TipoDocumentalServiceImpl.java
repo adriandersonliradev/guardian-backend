@@ -49,6 +49,11 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
     @Override
     @Transactional
     public TipoDocumentalDTO save(TipoDocumentalDTO tipoDocumentalDTO, Long idUsuario) throws IllegalAccessException {
+        String nomeDocumentoPadronizado = tipoDocumentalDTO.getNomeDocumento().trim().toLowerCase();
+        if (tipoDocumentalRepository.existsByNomeDocumento(nomeDocumentoPadronizado)) {
+            throw new IllegalArgumentException("Já existe um tipo documental com o nome fornecido.");
+        }
+
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(idUsuario);
         if (usuarioOpt.isPresent() && usuarioOpt.get().getAdmin()) {
             TipoDocumental tipoDocumental;
@@ -60,7 +65,7 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
                
                 System.out.println(tipoDocumental.getDocumentos().size());
                 
-                tipoDocumental.setNomeDocumento(tipoDocumentalDTO.getNomeDocumento());
+                tipoDocumental.setNomeDocumento(nomeDocumentoPadronizado);
                 tipoDocumental.setLeiRegulamentadora(tipoDocumentalDTO.getLeiRegulamentadora());
                 tipoDocumental.setStatus(tipoDocumentalDTO.getStatus());
                 tipoDocumental.setTempoRetencao(tipoDocumentalDTO.getTempoRetencao());
@@ -68,6 +73,7 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
 
             } else {
                 tipoDocumental = TipoDocumentalMapper.INSTANCE.toEntity(tipoDocumentalDTO);
+                tipoDocumental.setNomeDocumento(nomeDocumentoPadronizado);
             }
 
             TipoDocumental savedTipoDocumental = tipoDocumentalRepository.save(tipoDocumental);

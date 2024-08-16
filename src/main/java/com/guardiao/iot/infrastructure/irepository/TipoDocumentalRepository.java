@@ -7,6 +7,5 @@ import com.guardiao.iot.entity.TipoDocumentoEntity.TipoDocumental;
 
 @Repository
 public interface TipoDocumentalRepository extends JpaRepository<TipoDocumental, Long> {
-
-    
+    boolean existsByNomeDocumento(String nomeDocumento);  
 } 

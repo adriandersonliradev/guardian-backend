@@ -52,6 +52,15 @@ public class TipoDocumentalRepositoryImpl implements TipoDocumentalRepository {
     }
 
     @Override
+public boolean existsByNomeDocumento(String nomeDocumento) {
+    Session session = entityManager.unwrap(Session.class);
+    Long count = (Long) session.createQuery("SELECT COUNT(t) FROM TipoDocumental t WHERE LOWER(t.nomeDocumento) = LOWER(:nomeDocumento)")
+            .setParameter("nomeDocumento", nomeDocumento)
+            .uniqueResult();
+    return count != null && count > 0;
+}
+
+    @Override
     public void deleteAllByIdInBatch(Iterable<Long> ids) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteAllByIdInBatch'");
@@ -194,4 +203,8 @@ public class TipoDocumentalRepositoryImpl implements TipoDocumentalRepository {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findOne'");
     }
+
+    
+
+    
 }
