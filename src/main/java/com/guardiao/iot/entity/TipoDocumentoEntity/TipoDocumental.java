@@ -23,7 +23,7 @@ public class TipoDocumental {
     @Column(unique = true, nullable = false)
     private String nomeDocumento;
     private String leiRegulamentadora;
-    private String status;
+    private boolean status;
     private String tempoRetencao;
 
     @OneToMany(mappedBy = "tipoDocumental", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)

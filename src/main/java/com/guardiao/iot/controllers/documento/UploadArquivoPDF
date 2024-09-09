@@ -1,0 +1,39 @@
+Controller onde vai enviar o arquivo:
+@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<DocumentoDTO> salvarDocumento(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("documentoDTO") String documentoDTOJson) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            DocumentoDTO documentoDTO = objectMapper.readValue(documentoDTOJson, DocumentoDTO.class);
+
+            DocumentoDTO savedDocumento = documentoService.save(documentoDTO, file);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedDocumento);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+Service com logica de tratar esse arquivo:
+@Override
+    @Transactional
+    public DocumentoDTO save(DocumentoDTO documentoDTO, MultipartFile file) {
+
+        try {
+            documento.setArquivoPdf(file.getBytes()); <- Uma maneira de trasformar o arquivos em Byte para salvar no banco 
+                                                            OBS: atributo onde vai ser setado o valor tem que ser do tipo byte[], com notação @Lob
+                    } catch (IOException e) {
+            throw new RuntimeException("Erro ao salvar o arquivo PDF", e);
+        }
+
+}
+
+Forma de vizualizar esse o arquivo pdf vindo do banco:
+@GetMapping("/{id}/arquivo")
+    public ResponseEntity<byte[]> getDocumentoArquivo(@PathVariable Long id) {
+        byte[] pdfContent = documentoService.getDocumentoArquivo(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"documento_" + id + ".pdf\"")
+                .body(pdfContent);
+}

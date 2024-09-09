@@ -19,9 +19,15 @@ import com.guardiao.iot.infrastructure.irepository.DocumentoRepository;
 import com.guardiao.iot.infrastructure.irepository.TipoDocumentalRepository;
 import com.guardiao.iot.infrastructure.irepository.UsuarioRepository;
 import com.guardiao.iot.mappers.TipoDocumentalMapper;
+import java.util.Set;
 
 @Service
 public class TipoDocumentalServiceImpl implements TipoDocumentalService {
+
+    private static final Set<String> TIPOS_FIXOS = Set.of(
+            "contrato", "relatório financeiro", "ata de reunião", "nota fiscal",
+            "proposta comercial", "relatório técnico", "memorando", "laudo pericial",
+            "atestado", "contrato de trabalho", "declaração", "declaração e atestado");
 
     @Autowired
     private TipoDocumentalRepository tipoDocumentalRepository;
@@ -43,16 +49,21 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
     @Override
     public Optional<TipoDocumentalDTO> findById(Long id) {
         return tipoDocumentalRepository.findById(id)
-                .map(TipoDocumentalMapper.INSTANCE::toDTO);
+                .map(tipoDocumental -> {
+                    if (isInativo(tipoDocumental)) {
+                        throw new IllegalStateException("Tipo Documental está inativo.");
+                    }
+                    return TipoDocumentalMapper.INSTANCE.toDTO(tipoDocumental);
+                });
     }
 
     @Override
     @Transactional
     public TipoDocumentalDTO save(TipoDocumentalDTO tipoDocumentalDTO, Long idUsuario) throws IllegalAccessException {
         String nomeDocumentoPadronizado = tipoDocumentalDTO.getNomeDocumento().trim().toLowerCase();
-        if (tipoDocumentalRepository.existsByNomeDocumento(nomeDocumentoPadronizado)) {
+        /*if (tipoDocumentalRepository.existsByNomeDocumento(nomeDocumentoPadronizado)) {
             throw new IllegalArgumentException("Já existe um tipo documental com o nome fornecido.");
-        }
+        }*/
 
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(idUsuario);
         if (usuarioOpt.isPresent() && usuarioOpt.get().getAdmin()) {
@@ -62,18 +73,14 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
                 tipoDocumental = tipoDocumentalRepository.findById(tipoDocumentalDTO.getId())
                         .orElseThrow(() -> new EntityNotFoundException("Tipo Documental não existe"));
 
-               
-                System.out.println(tipoDocumental.getDocumentos().size());
-                
-                tipoDocumental.setNomeDocumento(nomeDocumentoPadronizado);
-                tipoDocumental.setLeiRegulamentadora(tipoDocumentalDTO.getLeiRegulamentadora());
-                tipoDocumental.setStatus(tipoDocumentalDTO.getStatus());
-                tipoDocumental.setTempoRetencao(tipoDocumentalDTO.getTempoRetencao());
-               
+                if (TIPOS_FIXOS.contains(tipoDocumental.getNomeDocumento().toLowerCase())) {
+                    verificarTipoDocumentalFixo(tipoDocumentalDTO, tipoDocumental);
+                } else {
+                    atualizarTipoDocumental(tipoDocumentalDTO, tipoDocumental);
+                }
 
             } else {
                 tipoDocumental = TipoDocumentalMapper.INSTANCE.toEntity(tipoDocumentalDTO);
-                tipoDocumental.setNomeDocumento(nomeDocumentoPadronizado);
             }
 
             TipoDocumental savedTipoDocumental = tipoDocumentalRepository.save(tipoDocumental);
@@ -87,9 +94,14 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
     @Transactional
     public void deleteById(Long id) {
         TipoDocumental tipoDocumental = tipoDocumentalRepository.findById(id)
-            .orElseThrow(()-> new EntityNotFoundException("tipo documental não existe"));
-            desassociarDocumentos(tipoDocumental);
-            tipoDocumentalRepository.deleteById(id);
+                .orElseThrow(() -> new EntityNotFoundException("tipo documental não existe"));
+
+        if (TIPOS_FIXOS.contains(tipoDocumental.getNomeDocumento().toLowerCase())) {
+            throw new IllegalArgumentException("Este tipo documental não pode ser deletado, apenas inativado.");
+        }
+
+        desassociarDocumentos(tipoDocumental);
+        tipoDocumentalRepository.deleteById(id);
     }
 
     private void desassociarDocumentos(TipoDocumental tipoDocumental) {
@@ -98,5 +110,31 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
             tipoDocumental.removeDocumento(documento);
         }
         tipoDocumentalRepository.save(tipoDocumental);
+    }
+
+    private void verificarTipoDocumentalFixo(TipoDocumentalDTO tipoDocumentalDTO, TipoDocumental tipoDocumental) {
+        boolean statusAtual = tipoDocumental.isStatus(); 
+        boolean statusNovo = tipoDocumentalDTO.getStatus(); 
+
+        if (statusAtual != statusNovo) {
+            tipoDocumental.setStatus(statusNovo);
+        } else {
+            throw new IllegalArgumentException("Este tipo documental não pode ser alterado, apenas inativado.");
+        }
+    }
+
+    private void atualizarTipoDocumental(TipoDocumentalDTO tipoDocumentalDTO, TipoDocumental tipoDocumental) {
+        tipoDocumental.setNomeDocumento(tipoDocumentalDTO.getNomeDocumento());
+        tipoDocumental.setLeiRegulamentadora(tipoDocumentalDTO.getLeiRegulamentadora());
+        tipoDocumental.setStatus(tipoDocumentalDTO.getStatus());
+        tipoDocumental.setTempoRetencao(tipoDocumentalDTO.getTempoRetencao());
+    }
+
+    private boolean isAtivo(TipoDocumental tipoDocumental) {
+        return tipoDocumental.isStatus();
+    }
+
+    private boolean isInativo(TipoDocumental tipoDocumental) {
+        return !tipoDocumental.isStatus();
     }
 }

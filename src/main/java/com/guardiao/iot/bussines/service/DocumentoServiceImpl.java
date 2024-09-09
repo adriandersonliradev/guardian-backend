@@ -49,11 +49,11 @@ public class DocumentoServiceImpl implements DocumentoService {
     public DocumentoDTO save(DocumentoDTO documentoDTO, MultipartFile file) {
         Documento documento;
 
-        if(documentoDTO.getId() != null){
+        if (documentoDTO.getId() != null) {
             documento = documentoRepository.findById(documentoDTO.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Documento não existe"));
-                documento.setNomeDocumento(documentoDTO.getNomeDocumento());
-        }else{
+                    .orElseThrow(() -> new EntityNotFoundException("Documento não existe"));
+            documento.setNomeDocumento(documentoDTO.getNomeDocumento());
+        } else {
             documento = DocumentoMapper.INSTANCE.toEntity(documentoDTO);
             documento.setDataHora(LocalDateTime.now());
         }
@@ -78,9 +78,9 @@ public class DocumentoServiceImpl implements DocumentoService {
     @Transactional
     public void deleteById(Long id) {
         Documento documento = documentoRepository.findById(id)
-            .orElseThrow(()-> new EntityNotFoundException("documento não existe"));
-            desassociarDocumentoDeTipoDocumental(documento);
-            documentoRepository.deleteById(documento.getId());
+                .orElseThrow(() -> new EntityNotFoundException("documento não existe"));
+        desassociarDocumentoDeTipoDocumental(documento);
+        documentoRepository.deleteById(documento.getId());
     }
 
     private void desassociarDocumentoDeTipoDocumental(Documento documento) {
@@ -104,6 +104,10 @@ public class DocumentoServiceImpl implements DocumentoService {
         if (documentoDTO.getTipoDocumentalId() != null) {
             TipoDocumental tipoDocumental = tipoDocumentalRepository.findById(documentoDTO.getTipoDocumentalId())
                     .orElseThrow(() -> new EntityNotFoundException("Tipo Documental não existe"));
+
+            if (isInativo(tipoDocumental)) {
+                throw new IllegalStateException("Não é possível atribuir um Tipo Documental inativo.");
+            }
             documento.setTipoDocumental(tipoDocumental);
         } else {
             documento.setTipoDocumental(null);
@@ -115,5 +119,9 @@ public class DocumentoServiceImpl implements DocumentoService {
         Documento documento = documentoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Documento não encontrado"));
         return documento.getArquivoPdf();
+    }
+
+    private boolean isInativo(TipoDocumental tipoDocumental) {
+        return !tipoDocumental.isStatus();
     }
 }
