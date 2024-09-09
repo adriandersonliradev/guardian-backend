@@ -61,7 +61,7 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
     @Transactional
     public TipoDocumentalDTO save(TipoDocumentalDTO tipoDocumentalDTO, Long idUsuario) throws IllegalAccessException {
         String nomeDocumentoPadronizado = tipoDocumentalDTO.getNomeDocumento().trim().toLowerCase();
-        /*if (tipoDocumentalRepository.existsByNomeDocumento(nomeDocumentoPadronizado)) {
+        if (tipoDocumentalRepository.existsByNomeDocumento(nomeDocumentoPadronizado)) {
             throw new IllegalArgumentException("Já existe um tipo documental com o nome fornecido.");
         }*/
 
