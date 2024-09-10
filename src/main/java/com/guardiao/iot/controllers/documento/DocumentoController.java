@@ -4,6 +4,8 @@ package com.guardiao.iot.controllers.documento;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,8 @@ import com.guardiao.iot.bussines.iservice.DocumentoService;
 import com.guardiao.iot.dto.DocumentoDTO;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpHeaders; // Spring Framework
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @RestController
@@ -35,6 +39,12 @@ public class DocumentoController {
     @GetMapping
     public ResponseEntity<List<DocumentoDTO>> listarTodosDocumentos() {
         List<DocumentoDTO> documentos = documentoService.findAll();
+        return ResponseEntity.ok().body(documentos);
+    }
+
+    @GetMapping("/expirados")
+    public ResponseEntity<List<DocumentoDTO>> listarTodosDocumentosExpirados() {
+        List<DocumentoDTO> documentos = documentoService.findDocumentosExpirados();
         return ResponseEntity.ok().body(documentos);
     }
 
@@ -54,7 +64,7 @@ public class DocumentoController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<DocumentoDTO> salvarDocumento(
+    public ResponseEntity<?> salvarDocumento(
             @RequestParam("file") MultipartFile file,
             @RequestParam("documentoDTO") String documentoDTOJson) {
         try {
@@ -63,6 +73,8 @@ public class DocumentoController {
 
             DocumentoDTO savedDocumento = documentoService.save(documentoDTO, file);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedDocumento);
+        }catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -77,4 +89,15 @@ public class DocumentoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Retorna 500 Internal Server Error
         }
     }
+
+    @DeleteMapping("/excluirdocumentos")
+    public ResponseEntity<String> excluirDocumentos(@RequestBody List<Long> ids) {
+        try {
+            documentoService.excluirDocumentosPorIds(ids);  // Pode usar o método excluirDocumentosPorIds também
+            return ResponseEntity.ok("Documentos excluídos com sucesso.");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+    
 }

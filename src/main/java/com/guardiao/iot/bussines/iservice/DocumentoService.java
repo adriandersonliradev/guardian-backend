@@ -14,4 +14,6 @@ public interface DocumentoService {
     DocumentoDTO save(DocumentoDTO documento, MultipartFile file);
     void deleteById(Long id);
     byte[] getDocumentoArquivo(Long id);
+    List<DocumentoDTO> findDocumentosExpirados();
+    void excluirDocumentosPorIds(List<Long> ids);
 }

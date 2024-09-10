@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,8 @@ public class TipoDocumental {
     private String leiRegulamentadora;
     private boolean status;
     private String tempoRetencao;
+    private LocalDate dataExpiracao;
+
 
     @OneToMany(mappedBy = "tipoDocumental", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private List<Documento> documentos = new ArrayList<>();

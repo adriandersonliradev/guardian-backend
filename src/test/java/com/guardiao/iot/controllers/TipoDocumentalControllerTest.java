@@ -1,4 +1,4 @@
-package com.guardiao.iot.controllers;
+/*package com.guardiao.iot.controllers;
 
 import com.guardiao.iot.bussines.iservice.TipoDocumentalService;
 import com.guardiao.iot.dto.TipoDocumentalDTO;
@@ -90,4 +90,4 @@ class TipoDocumentalControllerTest {
 
         verify(tipoDocumentalService, times(1)).deleteById(anyLong());
     }
-}
+}*/

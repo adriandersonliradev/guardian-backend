@@ -11,6 +11,7 @@ public class DocumentoDTO {
     private Long tipoDocumentalId;
     private Long usuarioId;
     private byte[] arquivoPdf;
+    private LocalDateTime dataExpiracao;
 
     public Long getId() {
         return id;
@@ -48,6 +49,10 @@ public class DocumentoDTO {
     public void setNomeDocumento(String nomeDocumento) {
         this.nomeDocumento = nomeDocumento;
     }
-
-    
+    public LocalDateTime getDataExpiracao() {
+        return dataExpiracao;
+    }
+    public void setDataExpiracao(LocalDateTime dataExpiracao) {
+        this.dataExpiracao = dataExpiracao;
+    }
 }

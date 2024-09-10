@@ -1,14 +1,27 @@
 package com.guardiao.iot.bussines.service;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.guardiao.iot.bussines.iservice.TipoDocumentalService;
 import com.guardiao.iot.dto.TipoDocumentalDTO;
@@ -38,6 +51,9 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
     @Autowired
     private DocumentoRepository documentoRepository;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Override
     @Transactional
     public List<TipoDocumentalDTO> findAll() {
@@ -61,9 +77,6 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
     @Transactional
     public TipoDocumentalDTO save(TipoDocumentalDTO tipoDocumentalDTO, Long idUsuario) throws IllegalAccessException {
         String nomeDocumentoPadronizado = tipoDocumentalDTO.getNomeDocumento().trim().toLowerCase();
-        if (tipoDocumentalRepository.existsByNomeDocumento(nomeDocumentoPadronizado)) {
-            throw new IllegalArgumentException("Já existe um tipo documental com o nome fornecido.");
-        }*/
 
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(idUsuario);
         if (usuarioOpt.isPresent() && usuarioOpt.get().getAdmin()) {
@@ -80,6 +93,9 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
                 }
 
             } else {
+                if (tipoDocumentalRepository.existsByNomeDocumento(nomeDocumentoPadronizado)) {
+                    throw new IllegalArgumentException("Já existe um tipo documental com o nome fornecido.");
+                }
                 tipoDocumental = TipoDocumentalMapper.INSTANCE.toEntity(tipoDocumentalDTO);
             }
 
@@ -137,4 +153,61 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
     private boolean isInativo(TipoDocumental tipoDocumental) {
         return !tipoDocumental.isStatus();
     }
+
+
+
+    @Override
+    public TipoDocumentalDTO classificarDocumentoEVerificar(MultipartFile file) {
+        String tipoDocumentalClassificado = classificarDocumentoNaAPI(file);
+    
+        Optional<TipoDocumental> tipoDocumentalOptional = tipoDocumentalRepository.findByNomeDocumento(tipoDocumentalClassificado);
+    
+        if (tipoDocumentalOptional.isPresent()) {
+            TipoDocumental tipoDocumental = tipoDocumentalOptional.get();
+    
+            if (isInativo(tipoDocumental)) {
+                throw new IllegalStateException("O Tipo Documental '" + tipoDocumentalClassificado + "' está inativo.");
+            }
+    
+            return TipoDocumentalMapper.INSTANCE.toDTO(tipoDocumental);
+        } else {
+            throw new EntityNotFoundException("O Tipo Documental '" + tipoDocumentalClassificado + "' não existe no sistema.");
+        }
+    } 
+
+
+    public String classificarDocumentoNaAPI(MultipartFile file) {
+        String apiUrl = "http://localhost:5000/classificar"; 
+    
+        MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
+        try {
+            multipartBodyBuilder.part("file", new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return file.getOriginalFilename(); 
+                }
+            }).contentType(MediaType.APPLICATION_PDF); 
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao ler o arquivo", e);
+        }
+    
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+    
+        HttpEntity<MultiValueMap<String, HttpEntity<?>>> requestEntity = new HttpEntity<>(multipartBodyBuilder.build(), headers);
+    
+        ResponseEntity<Map<String, String>> response = restTemplate.exchange(
+            apiUrl,
+            HttpMethod.POST,
+            requestEntity,
+            new ParameterizedTypeReference<Map<String, String>>() {}
+        );
+    
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            return response.getBody().get("tipo_documental");
+        } else {
+            throw new RuntimeException("Erro ao classificar documento na API Flask: " + response.getStatusCode());
+        }
+    }
+
 }

@@ -1,8 +1,15 @@
 package com.guardiao.iot.bussines.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.guardiao.iot.bussines.iservice.DocumentoService;
@@ -15,12 +22,24 @@ import com.guardiao.iot.infrastructure.irepository.TipoDocumentalRepository;
 import com.guardiao.iot.mappers.DocumentoMapper;
 
 import java.io.IOException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ByteArrayResource;
+import java.util.Map;
+
+
 import javax.persistence.EntityNotFoundException;
+
+
 
 @Service
 public class DocumentoServiceImpl implements DocumentoService {
@@ -63,9 +82,14 @@ public class DocumentoServiceImpl implements DocumentoService {
 
         try {
             documento.setArquivoPdf(file.getBytes());
+            //String tipoDocumentalClassificado = classificarDocumentoNaAPI(file);
+            //System.out.println("Tipo Documental Classificado pela API: " + tipoDocumentalClassificado);
         } catch (IOException e) {
             throw new RuntimeException("Erro ao salvar o arquivo PDF", e);
         }
+
+        documento.setDataExpiracao(LocalDate.now().plusDays(30));
+
 
         Documento savedDocumento = documentoRepository.save(documento);
         System.out.println("Arquivo PDF: " + savedDocumento.getArquivoPdf());
@@ -81,6 +105,18 @@ public class DocumentoServiceImpl implements DocumentoService {
                 .orElseThrow(() -> new EntityNotFoundException("documento não existe"));
         desassociarDocumentoDeTipoDocumental(documento);
         documentoRepository.deleteById(documento.getId());
+    }
+
+    @Override
+    @Transactional
+    public void excluirDocumentosPorIds(List<Long> ids) {
+        for (Long id : ids) {
+            if (documentoRepository.existsById(id)) {
+                documentoRepository.deleteById(id);
+            } else {
+                throw new EntityNotFoundException("Documento com ID " + id + " não encontrado");
+            }
+        }
     }
 
     private void desassociarDocumentoDeTipoDocumental(Documento documento) {
@@ -124,4 +160,14 @@ public class DocumentoServiceImpl implements DocumentoService {
     private boolean isInativo(TipoDocumental tipoDocumental) {
         return !tipoDocumental.isStatus();
     }
+
+    @Override
+    public List<DocumentoDTO> findDocumentosExpirados() {
+        LocalDate hoje = LocalDate.now();
+        List<Documento> documentosExpirados = documentoRepository.findDocumentosExpirados(hoje);
+        return documentosExpirados.stream()
+                .map(DocumentoMapper.INSTANCE::toDTO)
+                .collect(Collectors.toList());
+    }
+
 }

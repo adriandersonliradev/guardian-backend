@@ -60,6 +60,16 @@ public boolean existsByNomeDocumento(String nomeDocumento) {
     return count != null && count > 0;
 }
 
+@Override
+public Optional<TipoDocumental> findByNomeDocumento(String nomeDocumento) {
+    Session session = entityManager.unwrap(Session.class);
+    TipoDocumental tipoDocumental = (TipoDocumental) session.createQuery("FROM TipoDocumental t WHERE LOWER(t.nomeDocumento) = LOWER(:nomeDocumento)")
+            .setParameter("nomeDocumento", nomeDocumento)
+            .uniqueResult();
+    
+    return Optional.ofNullable(tipoDocumental);
+}
+
     @Override
     public void deleteAllByIdInBatch(Iterable<Long> ids) {
         // TODO Auto-generated method stub

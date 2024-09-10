@@ -22,14 +22,18 @@ public interface TipoDocumentalMapper {
     @Mapping(source = "leiRegulamentadora", target = "leiRegulamentadora")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "tempoRetencao", target = "tempoRetencao") 
+    @Mapping(source = "dataExpiracao", target = "dataExpiracao") 
     @Mapping(source = "documentos", target = "idDocumentos", qualifiedByName = "mapDocumentosIds")
     TipoDocumentalDTO toDTO(TipoDocumental tipoDocumental);
+
+    
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "nomeDocumento", target = "nomeDocumento")
     @Mapping(source = "leiRegulamentadora", target = "leiRegulamentadora")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "tempoRetencao", target = "tempoRetencao") 
+    @Mapping(source = "dataExpiracao", target = "dataExpiracao") 
     @Mapping(source = "idDocumentos", target = "documentos", ignore = true)
     TipoDocumental toEntity (TipoDocumentalDTO tipoDocumentalDTO);
 

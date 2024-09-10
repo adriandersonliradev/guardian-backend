@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,5 +45,18 @@ public class TipoDocumentalController {
     public ResponseEntity<?> deletarTipoDocumental(@PathVariable Long id) {
         tipoDocumentalService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/verificartipoarquivopdf")
+    public ResponseEntity<?> postMethodName( @RequestParam("file") MultipartFile file) {
+        try{
+            TipoDocumentalDTO tipoDocumental = tipoDocumentalService.classificarDocumentoEVerificar(file);
+            return ResponseEntity.ok(tipoDocumental);
+
+        }catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao processar o documento: " + e.getMessage());
+        }
     }
 }

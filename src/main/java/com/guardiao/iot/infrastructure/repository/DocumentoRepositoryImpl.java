@@ -1,5 +1,7 @@
 package com.guardiao.iot.infrastructure.repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -59,11 +61,31 @@ public class DocumentoRepositoryImpl implements DocumentoRepository {
     @Override
     public List<Documento> findByTipoDocumentalId(Long tipoDocumentalId) {
         Session session = entityManager.unwrap(Session.class);
-        return session.createQuery(" SELECT d FROM Documento d WHERE d.tipoDocumental.id = :tipoDocumentalId", Documento.class)
+        return session
+                .createQuery(" SELECT d FROM Documento d WHERE d.tipoDocumental.id = :tipoDocumentalId",
+                        Documento.class)
                 .setParameter("tipoDocumentalId", tipoDocumentalId)
                 .getResultList();
     }
 
+    @Override
+    public List<Documento> findDocumentosExpirados(LocalDate dataAtual) {
+        Session session = entityManager.unwrap(Session.class);
+        return session
+                .createQuery("SELECT d FROM Documento d WHERE d.tipoDocumental.dataExpiracao < :dataAtual",
+                        Documento.class)
+                .setParameter("dataAtual", dataAtual)
+                .getResultList();
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        Session session = entityManager.unwrap(Session.class);
+        Long count = (Long) session.createQuery("SELECT COUNT(d) FROM Documento d WHERE d.id = :id")
+                .setParameter("id", id)
+                .uniqueResult();
+        return count != null && count > 0;
+    }
 
     @Override
     public void deleteAllByIdInBatch(Iterable<Long> ids) {
@@ -180,12 +202,6 @@ public class DocumentoRepositoryImpl implements DocumentoRepository {
     }
 
     @Override
-    public boolean existsById(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'existsById'");
-    }
-
-    @Override
     public <S extends Documento> long count(Example<S> example) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'count'");
@@ -208,5 +224,5 @@ public class DocumentoRepositoryImpl implements DocumentoRepository {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findOne'");
     }
-    
+
 }

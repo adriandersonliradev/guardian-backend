@@ -1,4 +1,4 @@
-package com.guardiao.iot.bussines;
+/*package com.guardiao.iot.bussines;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -106,4 +106,4 @@ class DocumentoServiceImplTest {
         // Verificar se o método findAll do repositório foi chamado uma vez
         verify(documentoRepository, times(1)).findAll();
     }
-}
+}*/

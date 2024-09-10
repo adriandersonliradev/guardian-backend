@@ -1,7 +1,9 @@
 package com.guardiao.iot.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class TipoDocumentalDTO {
     private Long id;
@@ -11,6 +13,10 @@ public class TipoDocumentalDTO {
     private String tempoRetencao;
     private List<Long> idDocumentos;
     private int quantidadeDocumentos;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private LocalDate dataExpiracao;
+
 
     public Long getId() {
         return id;
@@ -55,6 +61,14 @@ public class TipoDocumentalDTO {
     public void setQuantidadeDocumentos(int quantidadeDocumentos) {
         this.quantidadeDocumentos = quantidadeDocumentos;
     }
+    public LocalDate getDataExpiracao() {
+        return dataExpiracao;
+    }
+    public void setDataExpiracao(LocalDate dataExpiracao) {
+        this.dataExpiracao = dataExpiracao;
+    }
+
+    
     
     
 }
