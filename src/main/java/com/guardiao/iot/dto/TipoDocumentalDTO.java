@@ -10,7 +10,7 @@ public class TipoDocumentalDTO {
     private String nomeDocumento;
     private String leiRegulamentadora;
     private boolean status;
-    private String tempoRetencao;
+    private int  tempoRetencao;
     private List<Long> idDocumentos;
     private int quantidadeDocumentos;
 
@@ -42,10 +42,10 @@ public class TipoDocumentalDTO {
     public void setStatus(boolean status) {
         this.status = status;
     }
-    public String getTempoRetencao() {
+    public int  getTempoRetencao() {
         return tempoRetencao;
     }
-    public void setTempoRetencao(String tempoRetencao) {
+    public void setTempoRetencao(int  tempoRetencao) {
         this.tempoRetencao = tempoRetencao;
     }
     public List<Long> getIdDocumentos() {

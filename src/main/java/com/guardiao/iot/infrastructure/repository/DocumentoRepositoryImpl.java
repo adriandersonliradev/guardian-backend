@@ -2,9 +2,11 @@ package com.guardiao.iot.infrastructure.repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.guardiao.iot.entity.DocumentoEntity.Documento;
+import com.guardiao.iot.entity.TipoDocumentoEntity.TipoDocumental;
 import com.guardiao.iot.infrastructure.irepository.DocumentoRepository;
 import org.hibernate.Session;
 
@@ -68,7 +71,7 @@ public class DocumentoRepositoryImpl implements DocumentoRepository {
                 .getResultList();
     }
 
-    @Override
+    /*@Override
     public List<Documento> findDocumentosExpirados(LocalDate dataAtual) {
         Session session = entityManager.unwrap(Session.class);
         return session
@@ -76,7 +79,24 @@ public class DocumentoRepositoryImpl implements DocumentoRepository {
                         Documento.class)
                 .setParameter("dataAtual", dataAtual)
                 .getResultList();
-    }
+    }*/
+
+    @Override
+public List<Documento> findDocumentosExpirados(LocalDate dataAtual) {
+    Session session = entityManager.unwrap(Session.class);
+    
+    // Consulta os documentos
+    List<Documento> documentos = session
+            .createQuery("SELECT d FROM Documento d", Documento.class)
+            .getResultList();
+    
+    // Filtra os documentos expirados
+    List<Documento> documentosExpirados = documentos.stream()
+        .filter(doc -> isDocumentoExpirado(doc, dataAtual))
+        .collect(Collectors.toList());
+    
+    return documentosExpirados;
+}
 
     @Override
     public boolean existsById(Long id) {
@@ -85,6 +105,19 @@ public class DocumentoRepositoryImpl implements DocumentoRepository {
                 .setParameter("id", id)
                 .uniqueResult();
         return count != null && count > 0;
+    }
+
+    private boolean isDocumentoExpirado(Documento documento, LocalDate dataAtual) {
+        TipoDocumental tipoDocumental = documento.getTipoDocumental();
+    
+        // Se o tipo documental tiver um tempo de retenção, calcule a data de expiração
+        if (tipoDocumental != null && tipoDocumental.getTempoRetencao() > 0) {
+            // Soma o tempo de retenção (em dias) à dataHora do documento
+            LocalDate dataExpiracao = documento.getDataHora().plusYears(tipoDocumental.getTempoRetencao());
+            return dataExpiracao.isBefore(dataAtual); // Verifica se já expirou
+        }
+        
+        return false;
     }
 
     @Override

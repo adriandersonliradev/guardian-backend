@@ -21,7 +21,7 @@ public class Documento {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String nomeDocumento;
-    private LocalDateTime dataHora;
+    private LocalDate dataHora;
 
     @OneToOne
     @JoinColumn(name = "tipo_documental_id")
@@ -30,5 +30,5 @@ public class Documento {
     @Lob
     private byte[] arquivoPdf;
 
-    private LocalDate dataExpiracao;
+    //private LocalDate dataExpiracao;
 }

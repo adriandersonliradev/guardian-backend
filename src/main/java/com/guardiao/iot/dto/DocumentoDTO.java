@@ -2,16 +2,18 @@ package com.guardiao.iot.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class DocumentoDTO {
     private Long id;
-    private LocalDateTime dataHora;
+    private LocalDate dataHora;
     private String nomeDocumento;
     private Long tipoDocumentalId;
     private Long usuarioId;
     private byte[] arquivoPdf;
-    private LocalDateTime dataExpiracao;
+    //private LocalDateTime dataExpiracao;
 
     public Long getId() {
         return id;
@@ -19,10 +21,10 @@ public class DocumentoDTO {
     public void setId(Long id) {
         this.id = id;
     }
-    public LocalDateTime getDataHora() {
+    public LocalDate getDataHora() {
         return dataHora;
     }
-    public void setDataHora(LocalDateTime dataHora) {
+    public void setDataHora(LocalDate dataHora) {
         this.dataHora = dataHora;
     }
     public Long getTipoDocumentalId() {
@@ -49,10 +51,10 @@ public class DocumentoDTO {
     public void setNomeDocumento(String nomeDocumento) {
         this.nomeDocumento = nomeDocumento;
     }
-    public LocalDateTime getDataExpiracao() {
+    /*public LocalDateTime getDataExpiracao() {
         return dataExpiracao;
     }
     public void setDataExpiracao(LocalDateTime dataExpiracao) {
         this.dataExpiracao = dataExpiracao;
-    }
+    }*/
 }

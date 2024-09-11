@@ -25,7 +25,7 @@ public class TipoDocumental {
     private String nomeDocumento;
     private String leiRegulamentadora;
     private boolean status;
-    private String tempoRetencao;
+    private int  tempoRetencao;
     private LocalDate dataExpiracao;
 
 

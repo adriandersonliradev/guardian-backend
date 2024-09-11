@@ -28,11 +28,13 @@ public class TipoDocumentalController {
     @GetMapping("/{id}")
     public ResponseEntity<TipoDocumentalDTO> buscarTipoDocumentalPorId(@PathVariable Long id) {
         Optional<TipoDocumentalDTO> tipoDocumental = tipoDocumentalService.findById(id);
-        return tipoDocumental.map(value -> ResponseEntity.ok().body(value)).orElseGet(() -> ResponseEntity.notFound().build());
+        return tipoDocumental.map(value -> ResponseEntity.ok().body(value))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<TipoDocumentalDTO> salvarTipoDocumental(@PathVariable Long id, @RequestBody TipoDocumentalDTO tipoDocumentalDTO) {
+    public ResponseEntity<TipoDocumentalDTO> salvarTipoDocumental(@PathVariable Long id,
+            @RequestBody TipoDocumentalDTO tipoDocumentalDTO) {
         try {
             TipoDocumentalDTO savedTipoDocumental = tipoDocumentalService.save(tipoDocumentalDTO, id);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedTipoDocumental);
@@ -43,20 +45,26 @@ public class TipoDocumentalController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarTipoDocumental(@PathVariable Long id) {
-        tipoDocumentalService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        try {
+            tipoDocumentalService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+
     }
 
     @PostMapping("/verificartipoarquivopdf")
-    public ResponseEntity<?> postMethodName( @RequestParam("file") MultipartFile file) {
-        try{
+    public ResponseEntity<?> postMethodName(@RequestParam("file") MultipartFile file) {
+        try {
             TipoDocumentalDTO tipoDocumental = tipoDocumentalService.classificarDocumentoEVerificar(file);
             return ResponseEntity.ok(tipoDocumental);
 
-        }catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao processar o documento: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao processar o documento: " + e.getMessage());
         }
     }
 }

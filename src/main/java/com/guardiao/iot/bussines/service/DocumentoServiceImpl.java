@@ -74,7 +74,7 @@ public class DocumentoServiceImpl implements DocumentoService {
             documento.setNomeDocumento(documentoDTO.getNomeDocumento());
         } else {
             documento = DocumentoMapper.INSTANCE.toEntity(documentoDTO);
-            documento.setDataHora(LocalDateTime.now());
+            documento.setDataHora(LocalDate.now());
         }
 
         associarEntidades(documento, documentoDTO);
@@ -88,7 +88,7 @@ public class DocumentoServiceImpl implements DocumentoService {
             throw new RuntimeException("Erro ao salvar o arquivo PDF", e);
         }
 
-        documento.setDataExpiracao(LocalDate.now().plusDays(30));
+        //documento.setDataExpiracao(LocalDate.now().plusDays(30));
 
 
         Documento savedDocumento = documentoRepository.save(documento);
