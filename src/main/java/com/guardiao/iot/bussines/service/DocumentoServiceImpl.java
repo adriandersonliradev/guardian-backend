@@ -112,7 +112,7 @@ public class DocumentoServiceImpl implements DocumentoService {
     public void excluirDocumentosPorIds(List<Long> ids) {
         for (Long id : ids) {
             if (documentoRepository.existsById(id)) {
-                documentoRepository.deleteById(id);
+                deleteById(id);
             } else {
                 throw new EntityNotFoundException("Documento com ID " + id + " não encontrado");
             }

@@ -74,7 +74,7 @@ public class DocumentoController {
             DocumentoDTO savedDocumento = documentoService.save(documentoDTO, file);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedDocumento);
         }catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
