@@ -11,5 +11,6 @@ public interface UsuarioService {
     Optional<UsuarioDTO> findById(Long id);
     UsuarioDTO save(UsuarioDTO tipoDocumentalDTO);
     void deleteById(Long id);
+    UsuarioDTO login(String email, String senha);
     
 } 

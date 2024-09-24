@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.management.Query;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
@@ -48,6 +49,26 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
         if (usuario != null) {
             session.delete(usuario);
         }
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        Session session = entityManager.unwrap(Session.class);
+        Long count = session
+                .createQuery("SELECT COUNT(u.id) FROM Usuario u WHERE u.email = :email", Long.class)
+                .setParameter("email", email)
+                .uniqueResult();
+        return count != null && count > 0;
+    }
+
+    @Override
+    public Optional<Usuario> findByEmail(String email) {
+        Session session = entityManager.unwrap(Session.class);
+        Usuario usuario = session
+                .createQuery("FROM Usuario u WHERE u.email = :email", Usuario.class)
+                .setParameter("email", email)
+                .uniqueResult();
+        return Optional.ofNullable(usuario);
     }
 
     @Override
