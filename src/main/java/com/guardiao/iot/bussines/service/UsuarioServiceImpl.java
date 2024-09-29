@@ -61,6 +61,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Cacheable(value = "usuarioCache", key = "#email")
     @Transactional
     public UsuarioDTO login(String email, String senha) {
         Optional<UsuarioDTO> usuarioOpt = findByEmail(email);

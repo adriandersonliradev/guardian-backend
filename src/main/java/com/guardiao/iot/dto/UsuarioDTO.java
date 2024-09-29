@@ -1,5 +1,7 @@
 package com.guardiao.iot.dto;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -7,7 +9,9 @@ import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-public class UsuarioDTO {
+public class UsuarioDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     private Long id;
         
     @NotBlank(message = "Nome é obrigatório")
