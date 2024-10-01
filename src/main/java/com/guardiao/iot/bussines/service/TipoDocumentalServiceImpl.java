@@ -149,7 +149,7 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
         if (statusAtual != statusNovo) {
             tipoDocumental.setStatus(statusNovo);
         } else {
-            throw new IllegalArgumentException("Este tipo documental não pode ser alterado, apenas inativado.");
+            throw new IllegalArgumentException("Este tipo documental não pode ser alterado, apenas ativado ou inativado.");
         }
     }
 
