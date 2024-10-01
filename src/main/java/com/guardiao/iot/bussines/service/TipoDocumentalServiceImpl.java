@@ -33,6 +33,13 @@ import com.guardiao.iot.infrastructure.irepository.TipoDocumentalRepository;
 import com.guardiao.iot.infrastructure.irepository.UsuarioRepository;
 import com.guardiao.iot.mappers.TipoDocumentalMapper;
 import java.util.Set;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class TipoDocumentalServiceImpl implements TipoDocumentalService {
@@ -53,6 +60,13 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+
+    private final RabbitTemplate rabbitTemplate;
+
+    private final MessageConverter messageConverter;
+
+
 
     @Override
     @Transactional
@@ -173,41 +187,79 @@ public class TipoDocumentalServiceImpl implements TipoDocumentalService {
         } else {
             throw new EntityNotFoundException("O Tipo Documental '" + tipoDocumentalClassificado + "' não existe no sistema.");
         }
-    } 
+    }
 
+    public TipoDocumentalServiceImpl(RabbitTemplate rabbitTemplate, MessageConverter messageConverter) {
+        this.rabbitTemplate = rabbitTemplate;
+        this.messageConverter = messageConverter;
+    }
 
-    public String classificarDocumentoNaAPI(MultipartFile file) {
-        String apiUrl = "http://localhost:5000/classificar"; 
-    
-        MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
+    public String classificarDocumentoNaAPI(MultipartFile file){
         try {
-            multipartBodyBuilder.part("file", new ByteArrayResource(file.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return file.getOriginalFilename(); 
-                }
-            }).contentType(MediaType.APPLICATION_PDF); 
+            // Converter o arquivo MultipartFile para bytes e criar uma mensagem RabbitMQ
+            byte[] fileBytes = file.getBytes();
+            MessageProperties messageProperties = new MessageProperties();
+            messageProperties.setContentType(MediaType.APPLICATION_PDF_VALUE);
+            messageProperties.setHeader("filename", file.getOriginalFilename());// Nome do arquivo
+            messageProperties.setReplyTo("documentRequestQueue");
+
+            Message message = new Message(fileBytes, messageProperties);
+
+            // Enviar a mensagem para a fila RabbitMQ e aguardar a resposta (RPC)
+            Message responseMessage = rabbitTemplate.sendAndReceive("documentRequestQueue", message);
+            System.out.println("Resposta da mensagem: " + responseMessage);
+
+            if (responseMessage != null) {
+                String response = new String(responseMessage.getBody());
+                System.out.println(response);
+                // Aqui você pode converter a resposta para o formato esperado, como JSON
+                Map<String, String> responseBody = new ObjectMapper().readValue(response, Map.class);
+
+                return responseBody.get("tipo_documental");
+            } else {
+                System.out.println("nulo");
+                throw new RuntimeException("Erro ao receber resposta do serviço de classificação");
+            }
         } catch (IOException e) {
-            throw new RuntimeException("Erro ao ler o arquivo", e);
-        }
-    
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-    
-        HttpEntity<MultiValueMap<String, HttpEntity<?>>> requestEntity = new HttpEntity<>(multipartBodyBuilder.build(), headers);
-    
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange(
-            apiUrl,
-            HttpMethod.POST,
-            requestEntity,
-            new ParameterizedTypeReference<Map<String, String>>() {}
-        );
-    
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            return response.getBody().get("tipo_documental");
-        } else {
-            throw new RuntimeException("Erro ao classificar documento na API Flask: " + response.getStatusCode());
+            throw new RuntimeException("Erro ao ler o arquivo ou processar resposta", e);
         }
     }
+
+
+
+//    public String classificarDocumentoNaAPI(MultipartFile file) {
+//        String apiUrl = "http://localhost:5000/classificar";
+//
+//        MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
+//        try {
+//            multipartBodyBuilder.part("file", new ByteArrayResource(file.getBytes()) {
+//                @Override
+//                public String getFilename() {
+//                    return file.getOriginalFilename();
+//                }
+//            }).contentType(MediaType.APPLICATION_PDF);
+//        } catch (IOException e) {
+//            throw new RuntimeException("Erro ao ler o arquivo", e);
+//        }
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+//
+//        HttpEntity<MultiValueMap<String, HttpEntity<?>>> requestEntity = new HttpEntity<>(multipartBodyBuilder.build(), headers);
+//
+//        ResponseEntity<Map<String, String>> response = restTemplate.exchange(
+//            apiUrl,
+//            HttpMethod.POST,
+//            requestEntity,
+//            new ParameterizedTypeReference<Map<String, String>>() {}
+//        );
+//
+//        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+//            return response.getBody().get("tipo_documental");
+//        } else {
+//            throw new RuntimeException("Erro ao classificar documento na API Flask: " + response.getStatusCode());
+//        }
+
+
 
 }
